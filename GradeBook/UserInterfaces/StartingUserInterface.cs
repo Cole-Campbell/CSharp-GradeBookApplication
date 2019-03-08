@@ -42,7 +42,9 @@ namespace GradeBook.UserInterfaces
             }
 			var name = parts[1].ToLower();
 			var type = parts[2].ToLower();
-			BaseGradeBook gradeBook = new BaseGradeBook(parts[2]);
+
+			BaseGradeBook gradeBook;
+
 			if (type == "standard")
 			{
 				gradeBook = new StandardGradeBook(parts[2]);
