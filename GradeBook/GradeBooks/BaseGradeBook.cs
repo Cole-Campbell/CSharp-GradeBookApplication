@@ -9,118 +9,137 @@ using Newtonsoft.Json.Linq;
 
 namespace GradeBook.GradeBooks
 {
-    public abstract class BaseGradeBook
-    {
-        public string Name { get; set; }
-        public List<Student> Students { get; set; }
+	public abstract class BaseGradeBook
+	{
+		public string Name { get; set; }
+		public List<Student> Students { get; set; }
 		public GradeBookType Type { get; set; }
+		public bool IsWeighted { get; set; }
 
-        public BaseGradeBook(string name)
-        {
-            Name = name;
-            Students = new List<Student>();
-        }
+		public BaseGradeBook(string name, bool isWeighted)
+		{
+			Name = name;
+			IsWeighted = isWeighted;
+			Students = new List<Student>();
+		}
 
-        public void AddStudent(Student student)
-        {
-            if (string.IsNullOrEmpty(student.Name))
-                throw new ArgumentException("A Name is required to add a student to a gradebook.");
-            Students.Add(student);
-        }
+		public void AddStudent(Student student)
+		{
+			if (string.IsNullOrEmpty(student.Name))
+				throw new ArgumentException("A Name is required to add a student to a gradebook.");
+			Students.Add(student);
+		}
 
-        public void RemoveStudent(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentException("A Name is required to remove a student from a gradebook.");
-            var student = Students.FirstOrDefault(e => e.Name == name);
-            if (student == null)
-            {
-                Console.WriteLine("student {0} was not found, try again.", name);
-                return;
-            }
-            Students.Remove(student);
-        }
+		public void RemoveStudent(string name)
+		{
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentException("A Name is required to remove a student from a gradebook.");
+			var student = Students.FirstOrDefault(e => e.Name == name);
+			if (student == null)
+			{
+				Console.WriteLine("student {0} was not found, try again.", name);
+				return;
+			}
+			Students.Remove(student);
+		}
 
-        public void AddGrade(string name, double score)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentException("A Name is required to add a grade to a student.");
-            var student = Students.FirstOrDefault(e => e.Name == name);
-            if (student == null)
-            {
-                Console.WriteLine("student {0} was not found, try again.", name);
-                return;
-            }
-            student.AddGrade(score);
-        }
+		public void AddGrade(string name, double score)
+		{
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentException("A Name is required to add a grade to a student.");
+			var student = Students.FirstOrDefault(e => e.Name == name);
+			if (student == null)
+			{
+				Console.WriteLine("student {0} was not found, try again.", name);
+				return;
+			}
+			student.AddGrade(score);
+		}
 
-        public void RemoveGrade(string name, double score)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentException("A Name is required to remove a grade from a student.");
-            var student = Students.FirstOrDefault(e => e.Name == name);
-            if (student == null)
-            {
-                Console.WriteLine("student {0} was not found, try again.", name);
-                return;
-            }
-            student.RemoveGrade(score);
-        }
+		public void RemoveGrade(string name, double score)
+		{
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentException("A Name is required to remove a grade from a student.");
+			var student = Students.FirstOrDefault(e => e.Name == name);
+			if (student == null)
+			{
+				Console.WriteLine("student {0} was not found, try again.", name);
+				return;
+			}
+			student.RemoveGrade(score);
+		}
 
-        public void ListStudents()
-        {
-            foreach (var student in Students)
-            {
-                Console.WriteLine("{0} : {1} : {2}", student.Name, student.Type, student.Enrollment);
-            }
-        }
+		public void ListStudents()
+		{
+			foreach (var student in Students)
+			{
+				Console.WriteLine("{0} : {1} : {2}", student.Name, student.Type, student.Enrollment);
+			}
+		}
 
-        public static BaseGradeBook Load(string name)
-        {
-            if (!File.Exists(name + ".gdbk"))
-            {
-                Console.WriteLine("Gradebook could not be found.");
-                return null;
-            }
+		public static BaseGradeBook Load(string name)
+		{
+			if (!File.Exists(name + ".gdbk"))
+			{
+				Console.WriteLine("Gradebook could not be found.");
+				return null;
+			}
 
-            using (var file = new FileStream(name + ".gdbk", FileMode.Open, FileAccess.Read))
-            {
-                using (var reader = new StreamReader(file))
-                {
-                    var json = reader.ReadToEnd();
-                    return ConvertToGradeBook(json);
-                }
-            }
-        }
+			using (var file = new FileStream(name + ".gdbk", FileMode.Open, FileAccess.Read))
+			{
+				using (var reader = new StreamReader(file))
+				{
+					var json = reader.ReadToEnd();
+					return ConvertToGradeBook(json);
+				}
+			}
+		}
 
-        public void Save()
-        {
-            using (var file = new FileStream(Name + ".gdbk", FileMode.Create, FileAccess.Write))
-            {
-                using (var writer = new StreamWriter(file))
-                {
-                    var json = JsonConvert.SerializeObject(this);
-                    writer.Write(json);
-                }
-            }
-        }
+		public void Save()
+		{
+			using (var file = new FileStream(Name + ".gdbk", FileMode.Create, FileAccess.Write))
+			{
+				using (var writer = new StreamWriter(file))
+				{
+					var json = JsonConvert.SerializeObject(this);
+					writer.Write(json);
+				}
+			}
+		}
 
-        public virtual double GetGPA(char letterGrade, StudentType studentType)
-        {
-            switch (letterGrade)
-            {
-                case 'A':
-                    return 4;
-                case 'B':
-                    return 3;
-                case 'C':
-                    return 2;
-                case 'D':
-                    return 1;
-                case 'F':
-                    return 0;
-            }
-            return 0;
+		public virtual double GetGPA(char letterGrade, StudentType studentType)
+		{
+			var gpa = 0;
+			 switch (letterGrade)
+				{
+					case 'A':
+						gpa = 4;
+						break;
+					case 'B':
+						gpa = 3;
+						break;
+					case 'C':
+						gpa = 2;
+						break;
+					case 'D':
+						gpa = 1;
+						break;
+					case 'F':
+						gpa = 0;
+						break;
+					default:
+						gpa = 0;
+						break;
+				}
+
+			if (IsWeighted && (studentType == StudentType.DualEnrolled || studentType == StudentType.Honors))
+			{
+				return gpa += 1;
+			}
+			else
+			{
+				return gpa;
+			}
         }
 
         public virtual void CalculateStatistics()
@@ -267,5 +286,10 @@ namespace GradeBook.GradeBooks
             
             return JsonConvert.DeserializeObject(json, gradebook);
         }
+
+		public bool IsWeightedGradeBook ()
+		{
+			return false;
+		}
     }
 }
